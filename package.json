@@ -13,9 +13,6 @@
   "bin": {
     "sitemap-stream-parser": "cli.js"
   },
-  "scripts": {
-    "prepublish": "coffee -c index.coffee"
-  },
   "author": "Erwin van der Koogh <erwin@404check.io>",
   "license": "Apache-2.0",
   "dependencies": {
