@@ -37,23 +37,39 @@ class SitemapParser {
     let isURLSet = false
     let isSitemapIndex = false
     let inLoc = false
+    let lastMod = null
+    let lastInfo = {}
+    let inUrlTag = null
 
     this.visited_sitemaps[url] = true
 
     const parserStream = sax.createStream(false, { trim: true, normalize: true, lowercase: true })
     parserStream.on('opentag', node => {
       inLoc = node.name === 'loc'
+      inUrlTag = node.name === 'url'
+      lastMod = node.name === 'lastmod'
       if (node.name === 'urlset') { isURLSet = true }
+      if (inUrlTag) {
+        this.urlCb(lastInfo)
+        lastInfo = {}
+      }
       if (node.name === 'sitemapindex') { isSitemapIndex = true }
+    })
+    parserStream.on('closetag', tagName => {
+      if (tagName === 'url') {
+      }
     })
     parserStream.on('error', err => {
       return done(err)
     })
     parserStream.on('text', text => {
-      text = urlParser.resolve(url, text)
-      if (inLoc) {
+      if (isURLSet && lastMod) {
+        lastInfo.lastMod = text
+      } else if (inLoc) {
+        text = urlParser.resolve(url, text)
         if (isURLSet) {
-          return this.urlCb(text, url)
+          lastInfo.text = text
+          lastInfo.url = url
         } else if (isSitemapIndex) {
           if (this.visited_sitemaps[text] != null) {
             return console.error(`Already parsed sitemap: ${text}`)
@@ -74,7 +90,7 @@ class SitemapParser {
 exports.parseSitemap = function (url, urlCb, sitemapCb, done) {
   const parser = new SitemapParser(urlCb, sitemapCb)
   return parser.parse(url, done)
-};
+}
 
 exports.parseSitemaps = function (urls, urlCb, sitemapTest, done) {
   if (!done) {
