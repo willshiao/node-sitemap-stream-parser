@@ -34,6 +34,7 @@ class SitemapParser {
   }
 
   parse (url, done) {
+    let errored = false
     let isURLSet = false
     let isSitemapIndex = false
     let inLoc = false
@@ -60,6 +61,7 @@ class SitemapParser {
       }
     })
     parserStream.on('error', err => {
+      errored = true
       return done(err)
     })
     parserStream.on('text', text => {
@@ -80,7 +82,7 @@ class SitemapParser {
       }
     })
     parserStream.on('end', () => {
-      return done(null)
+      if (!errored) return done(null)
     })
 
     return this._download(url, parserStream, done)
