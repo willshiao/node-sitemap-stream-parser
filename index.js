@@ -3,9 +3,10 @@ const sax = require('sax')
 const async = require('async')
 const zlib = require('zlib')
 const urlParser = require('url')
+const randomUseragent = require('random-useragent')
 
 const headers =
-  { 'user-agent': process.env.USER_AGENT || 'node-sitemap-stream-parser' }
+  { 'User-Agent': process.env.USER_AGENT || randomUseragent.getRandom() }
 const agentOptions = {
   keepAlive: true,
   gzip: true
